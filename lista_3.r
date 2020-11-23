@@ -1,0 +1,197 @@
+#Lista de Exercícios 3
+#Lucas Guimarães Mendes
+
+#Exercício 1
+'
+Os amigos David Gilmour, Robert Plant, Nick Manson e Jimmy
+Page desejam fazer um amigo oculto entre eles. Estime a probabilidade de
+que este amigo oculto não dê errado. Em seguida, crie uma função para
+estimar esta probabilidade em um grupo com n pessoas. Obs: um amigo
+oculto dá errado quando uma pessoa sorteia ela mesma.
+'
+#Parte 1:
+
+resultado <- c()
+
+for(j in 1:10000){
+  participantes <- c(1:3)
+  sorteio <- sample(participantes, length(participantes), replace = FALSE)
+  
+  for (i in participantes) {
+    if(sorteio[i] != participantes[i]){ #Deu certo!
+      indicador <- 1
+    }
+    else{
+      indicador <- 0
+      break
+    }
+  }
+  resultado[j] <- indicador
+}
+print(mean(resultado))
+
+
+#Parte 2:
+
+func_sorteio <- function(n,m){ #(Nro. de Participantes, Nro. de repetições)
+  resultado <- c()
+  
+  for(j in 1:m){
+    participantes <- c(1:n)
+    sorteio <- sample(participantes, length(participantes), replace = FALSE)
+    
+    for (i in participantes) {
+      if(sorteio[i] != participantes[i]){ #Deu certo!
+        indicador <- 1
+      }
+      else{
+        indicador <- 0
+        break
+      }
+    }
+    resultado[j] <- indicador
+  }
+  return(mean(resultado))
+}
+
+func_sorteio(1000,10000)
+
+# Exercício 2
+
+#Um dado equilibrado é lançado 2 vezes e os números obtidos
+#nos dois lançamentos são registrados. Estime a seguinte probabilidade: a
+#soma dos dois resultados é 7 ou 11.
+
+resultados <- c()
+
+for(i in 1:10000){
+  lancamentos <- c()
+  lancamentos <- sample(1:6, 2, replace = TRUE)
+  
+  resultados[i] <- sum(lancamentos) == 7 || sum(lancamentos) == 11
+}
+print(mean(resultados))
+
+
+# Exercício 3
+'
+Considere três urnas com as seguintes configurações: a urna I
+contém 6 bolas pretas, 3 brancas e 4 vermelhas; a urna II contém 3 bolas
+pretas, 5 brancas e 2 vermelhas; a urna III contém 4 bolas pretas, 2 brancas
+e 2 vermelhas. Lança-se um dado equilibrado. Se sair 5, uma bola da urna
+I é retirada; se sair 1, 4 ou 6, então uma bola da urna II é retirada; se sair
+2 ou 3, então uma bola da urna III é retirada. Estime a probabilidade da
+bola retirada ser vermelha.
+'
+
+# Soulçao escrita:
+'
+V = {sair bola vermelha}
+
+P(V) = ?
+  
+  P(U1) = 1/6  
+P(U2) = 3/6  
+P(U3) = 2/6  
+
+P(V|U1) = 4/13  
+P(V|U2) = 2/10  
+P(V|U3) = 2/8  
+
+
+P(V) = P(V ^ U1) + P(V ^ U2) + P(V ^ U3)  
+
+P(V) = P(U1) P(V|U1) + P(U2) P(V ^ U2) + P(U3) P(V|U3)  
+
+P(V) =  (1/6)(4/13) + (3/6)(2/10) + (2/6)(2/8)  
+'
+
+# Simulação:
+U1 <- c(rep("p",6), rep("b",3), rep("v",4))
+U2 <- c(rep("p",3), rep("b",5), rep("v",2))
+U3 <- c(rep("p",4), rep("b",2), rep("v",2))
+
+vet_bolas <- c()
+for(i in 1:10000){
+  dado <- sample(1:6, 1)
+  
+  if(dado == 5){
+    bola <- sample(U1, 1)
+  }
+  if(dado == 1 || dado == 4 || dado == 6){
+    bola <- sample(U2, 1)
+  }
+  if(dado == 2 || dado == 3){
+    bola <- sample(U3, 1)
+  }
+  vet_bolas[i] <- bola
+}
+print(mean(vet_bolas == "v"))
+
+
+
+# Exercício 4
+'
+No jogo de Craps dois dados são lançados:  
+  
+* se a soma for 7 ou 11, então você ganha o jogo;
+* se a soma for 2,3 ou 12, então você perde o jogo;
+* caso contrário, os dois dados são rolados novamente até obter-se 7 (você perde) ou até obter-se a soma inicial (você ganha).  
+
+Estime a probabilidade de você vencer o jogo de Craps.  
+
+Exemplo: as seguintes sequências (cada entrada é a soma dos dois dados) resultam
+em vitória: (9), (11), (5, 4, 5), (4, 5, 6, 12, 4); as seguintes sequências
+resultam em derrota: (2), (4, 11, 7), (8, 5, 2, 3, 9, 7).
+'
+
+resultado <- c()
+for(i in 1:10000){
+  dados <- sample(1:6, 2, replace = TRUE)
+  soma <- sum(dados)
+  
+  if(soma == 7 || soma == 11){
+    resultado[i] <- 1 #Venceu
+  } else if(soma == 2 || soma == 3 || soma == 12){
+    resultado[i] <- 0 #Perdeu
+  } else{
+    dados <- sample(1:6, 2, replace = TRUE)
+    soma <- sum(dados)
+    primeiro <- soma
+    
+    while(soma != 7 && soma != primeiro){
+      dados <- sample(1:6, 2, replace = TRUE)
+      soma <- sum(dados)
+    }
+    
+    if(soma == 7){
+      resultado[i] <- 0 #Perdeu
+    } else{
+      resultado[i] <- 1 #Venceu
+    }
+  }
+}
+
+print(mean(resultado))
+
+# Exercício 5
+#Utilize o método de MC para estimar as seguintes integrais:
+
+#Integral 1
+a = -1
+b = 2
+
+x <- runif(10, a, b)
+x <- (-x*x)/2
+result <- exp(x)/sqrt(2*pi)
+print(mean(result)*(b - a))
+
+
+#Integral 2
+a = 0
+b = pi
+
+x <- runif(10000, a, b)
+result <- cos(x)*cos(x)
+mean(result)*(b - a)
+
